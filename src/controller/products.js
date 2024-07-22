@@ -122,20 +122,39 @@ export const updateSingleProduct = async(req, res) =>{
     }
 };
 
-export const fetchAllProducts = async (req, res ) => {
-    
-    const products = await Product.findAll()
-        if(!products || products.length == 0){
+export const fetchAllProducts = async (req, res) => {
+    const { page = 1, limit = 20 } = req.query;
+
+    try {
+        const offset = (page - 1) * limit;
+        
+        const { count, rows } = await Product.findAndCountAll({
+            offset: parseInt(offset, 20),
+            limit: parseInt(limit, 20)
+        });
+
+        if (rows.length === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({
-                message : "No available Products",
+                message: "No available Products",
                 status: StatusCodes.NOT_FOUND
             });
         }
+
         return res.status(StatusCodes.OK).json({
             message: "Products retrieved successfully",
-            data: products,
+            data: rows,
+            totalItems: count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: parseInt(page, 10),
             status: StatusCodes.OK
         });
+    } catch (error) {
+        console.error(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "An error occurred while retrieving the products",
+            status: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
 };
 
 export const fetchSingleProduct = async( req, res ) => {
