@@ -76,3 +76,115 @@ export const createProduct = async (req, res) => {
         });
     }
 };
+
+
+export const updateSingleProduct = async(req, res) =>{
+    const { id } = req.params;
+    const {name, price, description, categoryId} = req.body;
+
+    try {
+        
+        const product = await Product.findByPk(id);
+         if (!product) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                message: "Product ID does not exist",
+                status: StatusCodes.NOT_FOUND
+            });
+        }
+
+        if(categoryId){
+            const category = await Category.findOne({ where: {id:categoryId } });
+            if (!category) {
+                return res.status(StatusCodes.NOT_FOUND).json({
+                    message: "Category ID does not exist",
+                    status: StatusCodes.NOT_FOUND
+                });
+            }
+            product.categoryId = category.id;
+        }
+        if(name) product.name = name;
+        if(price !== undefined) product.price = price;
+        if(description) product.description = description
+
+        await product.save()
+
+        return res.status(StatusCodes.OK).json({
+            message: "Product updated successfully",
+            data: product,
+            status: StatusCodes.OK
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "An error occurred while updating the product",
+            status: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+};
+
+export const fetchAllProducts = async (req, res ) => {
+    
+    const products = await Product.findAll()
+        if(!products || products.length == 0){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                message : "No available Products",
+                status: StatusCodes.NOT_FOUND
+            });
+        }
+        return res.status(StatusCodes.OK).json({
+            message: "Products retrieved successfully",
+            data: products,
+            status: StatusCodes.OK
+        });
+};
+
+export const fetchSingleProduct = async( req, res ) => {
+    const {id} = req.params;
+
+    const product = await Product.findByPk(id)
+        if(!product){
+            return res.status(StatusCodes.NOT_FOUND).json({
+                message : "Product does not exist",
+                status: StatusCodes.NOT_FOUND
+            });
+        }
+        return res.status(StatusCodes.OK).json({
+            message: "Product retrieved successfully",
+            data: product,
+            status: StatusCodes.OK
+        })
+};
+
+export const deleteSingleProdcut = async(req, res) =>{
+    const {id} = req.params;
+
+    const product = await Product.destroy({
+        where: {id},
+        truncate: false
+    });
+
+    if(!product){
+        return res.status(StatusCodes.NOT_FOUND).json({
+            message: " Produt does not exist",
+            status: StatusCodes.NOT_FOUND
+        });
+    }
+
+    return res.status(StatusCodes.OK).json({
+        message: "Product deleted successfully",
+        status: StatusCodes.OK
+    })
+};
+
+export const deleteAllProducts = async(req, res) => {
+   
+   await Product.destroy({
+        where: {},
+        truncate: false
+    });
+
+    return res.status(StatusCodes.OK).json({
+        message: "All products deleted",
+        status: StatusCodes.OK
+    })
+}
