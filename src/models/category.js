@@ -1,9 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/initials.js';
 
-const generateCategoryId = () => {
-    return 'CAT-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-};
 
 const Category = sequelize.define('Category', {
     id: {
@@ -29,11 +26,6 @@ const Category = sequelize.define('Category', {
     },
 }, {
     tableName: 'category',
-    // hooks: {
-    //     beforeCreate: (category, options) => {
-    //         category.categoryId = generateCategoryId();
-    //     }
-    // }
 });
 
 export default Category;
