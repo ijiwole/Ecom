@@ -19,7 +19,6 @@ export const protect_user = async (req, res, next) => {
         token = auth.split(" ")[1]; 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Find the user associated with the token
         const user = await User.findByPk(decoded.id);
         if (!user) {
             return res
